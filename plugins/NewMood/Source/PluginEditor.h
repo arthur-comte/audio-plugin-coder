@@ -7,7 +7,8 @@
 /**
  * NewMood Plugin Editor - Simple JUCE UI with controls
  */
-class NewMoodAudioProcessorEditor : public juce::AudioProcessorEditor
+class NewMoodAudioProcessorEditor : public juce::AudioProcessorEditor,
+                                    private juce::Timer
 {
 public:
     NewMoodAudioProcessorEditor (NewMoodAudioProcessor&);
@@ -19,6 +20,7 @@ public:
 
 private:
     void createSlider (const juce::String& label, const juce::String& paramId, int x, int y);
+    void timerCallback() override;
     
     //==============================================================================
     // UI Elements

@@ -30,14 +30,33 @@ NewMoodAudioProcessorEditor::NewMoodAudioProcessorEditor (NewMoodAudioProcessor&
     recordButton.setButtonText ("REC");
     recordButton.setBounds (650, 200, 80, 30);
     recordButton.setColour (juce::TextButton::buttonColourId, juce::Colour (0xFF444444));
+    recordButton.setColour (juce::TextButton::buttonOnColourId, juce::Colour (0xFFFF0000));
     addAndMakeVisible (recordButton);
     
     // Connect button to parameter
     recordButton.onClick = [this] {
         auto* param = audioProcessor.parameters.getParameter ("record");
         if (param)
-            param->setValueNotifyingHost (recordButton.getToggleState() ? 1.0f : 0.0f);
+        {
+            bool newState = !recordButton.getToggleState();
+            recordButton.setToggleState (newState, juce::sendNotification);
+            param->setValueNotifyingHost (newState ? 1.0f : 0.0f);
+        }
     };
+    
+    // Update button color based on recording state
+    startTimer (50); // Check every 50ms
+}
+
+void NewMoodAudioProcessorEditor::timerCallback()
+{
+    // Update button color based on recording state
+    auto* recordParam = audioProcessor.parameters.getParameter ("record");
+    if (recordParam)
+    {
+        bool isRecording = recordParam->getValue() > 0.5f;
+        recordButton.setToggleState (isRecording, juce::dontSendNotification);
+    }
 }
 
 void NewMoodAudioProcessorEditor::createSlider (const juce::String& label, const juce::String& paramId, int x, int y)
