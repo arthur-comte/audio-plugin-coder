@@ -9,7 +9,7 @@ NewMoodAudioProcessorEditor::NewMoodAudioProcessorEditor (NewMoodAudioProcessor&
 
     // Title
     titleLabel.setText ("NewMood", juce::dontSendNotification);
-    titleLabel.setFont (juce::Font (28.0f, juce::Font::bold));
+    titleLabel.setFont (juce::FontOptions (28.0f, juce::Font::bold));
     titleLabel.setColour (juce::Label::textColourId, juce::Colour (0xFFFF6B35));
     titleLabel.setBounds (320, 20, 160, 35);
     addAndMakeVisible (titleLabel);
@@ -33,9 +33,10 @@ NewMoodAudioProcessorEditor::NewMoodAudioProcessorEditor (NewMoodAudioProcessor&
     addAndMakeVisible (recordButton);
     
     // Connect button to parameter
-    recordButton.onClick = [this] { 
-        auto* param = audioProcessor.parameters.getRawParameterValue ("record");
-        param->setValueNotifyingHost (recordButton.getToggleState() ? 1.0f : 0.0f);
+    recordButton.onClick = [this] {
+        auto* param = audioProcessor.parameters.getParameter ("record");
+        if (param)
+            param->setValueNotifyingHost (recordButton.getToggleState() ? 1.0f : 0.0f);
     };
 }
 
@@ -44,7 +45,7 @@ void NewMoodAudioProcessorEditor::createSlider (const juce::String& label, const
     // Label
     auto* l = new juce::Label();
     l->setText (label, juce::dontSendNotification);
-    l->setFont (juce::Font (12.0f));
+    l->setFont (juce::FontOptions (12.0f));
     l->setColour (juce::Label::textColourId, juce::Colour (0xFFAAAAAA));
     l->setBounds (x, y, 80, 20);
     addAndMakeVisible (l);
@@ -60,7 +61,7 @@ void NewMoodAudioProcessorEditor::createSlider (const juce::String& label, const
     
     // Connect to parameter
     s->onValueChange = [this, paramId, s]() {
-        auto* param = audioProcessor.parameters.getRawParameterValue (paramId);
+        auto* param = audioProcessor.parameters.getParameter (paramId);
         if (param)
             param->setValueNotifyingHost ((float)s->getValue());
     };
