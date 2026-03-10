@@ -263,16 +263,10 @@ void NewMoodAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     const float mix = parameters.getRawParameterValue ("mix")->load();
     const float level = parameters.getRawParameterValue ("level")->load();
     const float feedback = parameters.getRawParameterValue ("feedback")->load();
-    const float tone = parameters.getRawParameterValue ("tone")->load();
     const float speedParam = parameters.getRawParameterValue ("speed")->load();
     const float grainSizeParam = parameters.getRawParameterValue ("grainSize")->load();
     const float driftParam = parameters.getRawParameterValue ("drift")->load();
     const float spreadParam = parameters.getRawParameterValue ("spread")->load();
-    
-    // Recording controls
-    const bool record = parameters.getRawParameterValue ("record")->load() > 0.5f;
-    const bool overdub = parameters.getRawParameterValue ("overdub")->load() > 0.5f;
-    const bool reverse = parameters.getRawParameterValue ("reverse")->load() > 0.5f;
     
     // Calculate loop length from time parameter
     const float timeParam = parameters.getRawParameterValue ("time")->load();
@@ -291,19 +285,21 @@ void NewMoodAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     auto* leftChannel = buffer.getWritePointer (0);
     auto* rightChannel = buffer.getNumChannels() > 1 ? buffer.getWritePointer (1) : leftChannel;
     
+    // Always write input to buffer (circular buffer for real-time processing)
+    float inputSample;
     for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
     {
-        // Recording: write input to loop buffer
-        if (record)
-        {
-            loopBuffer[writePosition] = (leftChannel[sample] + (rightChannel[sample])) * 0.5f;
-            writePosition = (writePosition + 1) % bufferSize;
-            if (loopLength > 0 && writePosition >= loopLength)
-                writePosition = 0;
-        }
+        // Mix stereo to mono for buffer
+        inputSample = (leftChannel[sample] + (rightChannel[sample])) * 0.5f;
         
-        // Playback: read from loop buffer with granular playback
-        if (loopLength > 10 && !record)
+        // Write to circular buffer
+        loopBuffer[writePosition] = inputSample;
+        writePosition = (writePosition + 1) % bufferSize;
+        if (loopLength > 0 && writePosition >= loopLength)
+            writePosition = 0;
+        
+        // Granular playback - always active
+        if (loopLength > 10)
         {
             // Calculate grain position
             float grainPos = (readPosition + sample * speed) / static_cast<float>(grainSize);
@@ -317,8 +313,8 @@ void NewMoodAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
             float leftSample = loopBuffer[grainIndex];
             float rightSample = loopBuffer[(grainIndex + static_cast<int>(spread * loopLength)) % loopLength];
             
-            // Apply feedback
-            float feedbackSample = (leftSample + rightSample) * 0.5f * feedback;
+            // Apply feedback (feedback > 0 creates regeneration)
+            float feedbackSample = (leftSample + rightSample) * 0.5f;
             
             // Mix dry/wet
             float wetSample = feedbackSample;

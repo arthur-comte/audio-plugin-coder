@@ -66,9 +66,6 @@ private:
     
     // State
     double currentSampleRate = 44100.0;
-    bool isRecording = false;
-    bool isOverdubbing = false;
-    bool isReversed = false;
     
     //==============================================================================
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
