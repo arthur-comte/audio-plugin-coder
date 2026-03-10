@@ -15,7 +15,7 @@ jobs:
         with:
           submodules: recursive
       - name: Configure
-        run: cmake -S . -B build -G Xcode -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+        run: cmake -S . -B build -G Xcode -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DAPC_ENABLE_VISAGE:BOOL=ON
       - name: Build VST3
         run: cmake --build build --config Release --target newmood_VST3
       - name: Build AU

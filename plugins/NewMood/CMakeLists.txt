@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.15)
 # Plugin definition with Visage support
 juce_add_plugin(newmood
     COMPANY_NAME "APC"
-    PLUGIN_MANUFACTURER_CODE "APC"
+    PLUGIN_MANUFACTURER_CODE "APCM"
     PLUGIN_CODE "NMWD"
     FORMATS VST3 Standalone
     PRODUCT_NAME "NewMood"
