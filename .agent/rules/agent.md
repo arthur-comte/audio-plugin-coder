@@ -13,6 +13,11 @@
 ### 2. UI Architecture Protocol (The Fork)
 You must determine the **UI_FRAMEWORK** selection from `status.json` before generating code.
 
+### 3. Model Fallback Protocol
+If the model specified in `default_model` (e.g., `minimax/minimax-m2.5`) returns an error (e.g., 500 Internal Server Error) or fails to generate valid code, you MUST:
+1.  **Switch to Fallback:** Use the model specified in `fallback_model` from `status.json` (e.g., `moonshotai/kimi-k2.5`).
+2.  **Inform User:** Briefly state that you are switching to the fallback model due to errors with the primary model.
+
 *   **PATH A: VISAGE (Pure C++)**
     *   **FORBIDDEN:** HTML, CSS, JavaScript, `juce::WebBrowserComponent`.
     *   **HEADERS:** `visage/visage.h` does not exist. Use `#include "visage/app.h"` or `#include "visage/ui.h"`.

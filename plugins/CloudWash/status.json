@@ -1,5 +1,6 @@
 {
   "plugin_name": "CloudWash",
+  "default_model": "minimax/minimax-m2.5",
   "version": "v1.0.0",
   "current_phase": "ship_complete",
   "ui_framework": "webview",

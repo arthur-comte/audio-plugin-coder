@@ -1,5 +1,6 @@
 {
   "plugin_name": "",
+  "default_model": "minimax/minimax-m2.5",
   "version": "v0.0.0",
   "current_phase": "ideation",
   "ui_framework": "pending",

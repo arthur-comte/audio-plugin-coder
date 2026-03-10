@@ -1,0 +1,66 @@
+[  1%] Built target moodscopytest_Assets
+[  1%] Built target VisageApp
+[ 13%] Built target freetype
+[ 65%] Built target VisageEmbeddedShaders
+[ 67%] Built target VisageEmbeddedFonts
+[ 68%] Built target VisageEmbeddedIcons
+[ 68%] Built target bx
+[ 75%] Built target bimg
+[ 77%] Built target bimg_decode
+[ 87%] Built target bimg_encode
+[ 87%] Built target bgfx
+[ 89%] Built target VisageGraphics
+[ 89%] Built target VisageUi
+[ 89%] Built target VisageUtils
+[ 91%] Built target VisageWidgets
+[ 91%] Built target VisageWindowing
+[ 93%] Built target visage
+[ 93%] Building CXX object plugins/MoodsCopyTest/CMakeFiles/moodscopytest.dir/Source/PluginProcessor.cpp.o
+In file included from /Users/arthurcomte/audio-plugin-coder/plugins/MoodsCopyTest/Source/PluginProcessor.cpp:2:
+In file included from /Users/arthurcomte/audio-plugin-coder/plugins/MoodsCopyTest/Source/PluginEditor.h:13:
+/Users/arthurcomte/audio-plugin-coder/plugins/MoodsCopyTest/Source/VisageControls.h:36:72: error: use of undeclared identifier 'moodscopytest_BinaryData'
+        const auto* font_data = reinterpret_cast<const unsigned char*>(moodscopytest_BinaryData::LatoRegular_ttf);
+                                                                       ^
+/Users/arthurcomte/audio-plugin-coder/plugins/MoodsCopyTest/Source/VisageControls.h:37:54: error: use of undeclared identifier 'moodscopytest_BinaryData'
+        title_font_ = visage::Font(20.0f, font_data, moodscopytest_BinaryData::LatoRegular_ttfSize, dpi);
+                                                     ^
+/Users/arthurcomte/audio-plugin-coder/plugins/MoodsCopyTest/Source/VisageControls.h:38:54: error: use of undeclared identifier 'moodscopytest_BinaryData'
+        label_font_ = visage::Font(14.0f, font_data, moodscopytest_BinaryData::LatoRegular_ttfSize, dpi);
+                                                     ^
+/Users/arthurcomte/audio-plugin-coder/plugins/MoodsCopyTest/Source/VisageControls.h:39:54: error: use of undeclared identifier 'moodscopytest_BinaryData'
+        value_font_ = visage::Font(12.0f, font_data, moodscopytest_BinaryData::LatoRegular_ttfSize, dpi);
+                                                     ^
+In file included from /Users/arthurcomte/audio-plugin-coder/plugins/MoodsCopyTest/Source/PluginProcessor.cpp:2:
+In file included from /Users/arthurcomte/audio-plugin-coder/plugins/MoodsCopyTest/Source/PluginEditor.h:14:
+/Users/arthurcomte/audio-plugin-coder/plugins/MoodsCopyTest/../../common/VisageJuceHost.h:113:31: warning: unused parameter 'w' [-Wunused-parameter]
+    virtual void onResize(int w, int h) {}
+                              ^
+/Users/arthurcomte/audio-plugin-coder/plugins/MoodsCopyTest/../../common/VisageJuceHost.h:113:38: warning: unused parameter 'h' [-Wunused-parameter]
+    virtual void onResize(int w, int h) {}
+                                     ^
+/Users/arthurcomte/audio-plugin-coder/plugins/MoodsCopyTest/Source/PluginProcessor.cpp:28:58: warning: unused parameter 'index' [-Wunused-parameter]
+void MoodsCopyTestAudioProcessor::setCurrentProgram (int index) { }
+                                                         ^
+/Users/arthurcomte/audio-plugin-coder/plugins/MoodsCopyTest/Source/PluginProcessor.cpp:29:69: warning: unused parameter 'index' [-Wunused-parameter]
+const juce::String MoodsCopyTestAudioProcessor::getProgramName (int index) { return {}; }
+                                                                    ^
+/Users/arthurcomte/audio-plugin-coder/plugins/MoodsCopyTest/Source/PluginProcessor.cpp:30:58: warning: unused parameter 'index' [-Wunused-parameter]
+void MoodsCopyTestAudioProcessor::changeProgramName (int index, const juce::String& newName) { }
+                                                         ^
+/Users/arthurcomte/audio-plugin-coder/plugins/MoodsCopyTest/Source/PluginProcessor.cpp:30:85: warning: unused parameter 'newName' [-Wunused-parameter]
+void MoodsCopyTestAudioProcessor::changeProgramName (int index, const juce::String& newName) { }
+                                                                                    ^
+/Users/arthurcomte/audio-plugin-coder/plugins/MoodsCopyTest/Source/PluginProcessor.cpp:54:73: warning: unused parameter 'samplesPerBlock' [-Wunused-parameter]
+void MoodsCopyTestAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+                                                                        ^
+/Users/arthurcomte/audio-plugin-coder/plugins/MoodsCopyTest/Source/PluginProcessor.cpp:94:15: warning: unused variable 'clock' [-Wunused-variable]
+        float clock = smoothedClock.getNextValue();
+              ^
+/Users/arthurcomte/audio-plugin-coder/plugins/MoodsCopyTest/Source/PluginProcessor.cpp:77:101: warning: unused parameter 'midiMessages' [-Wunused-parameter]
+void MoodsCopyTestAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+                                                                                                    ^
+9 warnings and 4 errors generated.
+make[3]: *** [plugins/MoodsCopyTest/CMakeFiles/moodscopytest.dir/Source/PluginProcessor.cpp.o] Error 1
+make[2]: *** [plugins/MoodsCopyTest/CMakeFiles/moodscopytest.dir/all] Error 2
+make[1]: *** [plugins/MoodsCopyTest/CMakeFiles/moodscopytest_Standalone.dir/rule] Error 2
+make: *** [moodscopytest_Standalone] Error 2

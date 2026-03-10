@@ -1,5 +1,6 @@
 {
   "plugin_name": "nf_gnarly",
+  "default_model": "minimax/minimax-m2.5",
   "version": "v0.0.0",
   "current_phase": "design_complete",
   "ui_framework": "webview",

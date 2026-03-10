@@ -53,10 +53,10 @@ public:
     }
 
     void paint(juce::Graphics& g) override { 
-        g.fillAll(juce::Colours::black);
+        g.fillAll(juce::Colours::darkblue);
 
         if (windowless_ && backbuffer_.isValid()) {
-            g.drawImageAt(backbuffer_, 0, 0);
+            g.drawImageWithin(backbuffer_, 0, 0, getWidth(), getHeight(), juce::RectanglePlacement::stretchToFit);
         }
     }
 
@@ -76,13 +76,21 @@ public:
         dispatchMouse(e, MouseDispatch::Move);
     }
 
+    void mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel) override {
+        dispatchWheel(wheel, e);
+    }
+
     void resized() override { 
         onResize(getWidth(), getHeight()); 
         if (canvas_) {
+            const float scale = (float)getApproximateScaleFactorForComponent(this);
+            const int physicalW = juce::roundToInt(getWidth() * scale);
+            const int physicalH = juce::roundToInt(getHeight() * scale);
+
             if (windowless_) {
-                canvas_->setWindowless(getWidth(), getHeight());
+                canvas_->setWindowless(physicalW, physicalH);
             } else {
-                canvas_->setDimensions(getWidth(), getHeight());
+                canvas_->setDimensions(physicalW, physicalH);
             }
         }
     }
@@ -132,7 +140,8 @@ protected:
         frame->setEventHandler(&eventHandler_);
         
         // Set DPI scale
-        frame->setDpiScale((float)getDesktopScaleFactor());
+        float scale = (float)getApproximateScaleFactorForComponent(this);
+        frame->setDpiScale(scale);
         
         // Initialize the frame
         frame->init();
@@ -199,11 +208,14 @@ private:
         if (!event_root_)
             return;
 
+        // window_position = cursor position relative to this component (top-left = 0,0)
+        // This matches how visage's WindowEventHandler sets window_position from the native cursor x,y
+        const visage::Point window_pos = { static_cast<float>(e.position.x), static_cast<float>(e.position.y) };
+        
         visage::MouseEvent me;
-        me.event_frame = event_root_;
-        me.position = { static_cast<float>(e.position.x), static_cast<float>(e.position.y) };
-        me.relative_position = me.position;
-        me.window_position = { static_cast<float>(e.getScreenX()), static_cast<float>(e.getScreenY()) };
+        me.window_position = window_pos;
+        me.relative_position = window_pos - last_mouse_window_pos_;
+        last_mouse_window_pos_ = window_pos;
 
         int mods = visage::kModifierNone;
         if (e.mods.isShiftDown()) mods |= visage::kModifierShift;
@@ -223,15 +235,99 @@ private:
                               e.mods.isRightButtonDown() ? visage::kMouseButtonRight :
                               e.mods.isMiddleButtonDown() ? visage::kMouseButtonMiddle :
                               visage::kMouseButtonLeft;
-        }
-        me.button_id = last_button_id_;
-        me.is_down = (type != MouseDispatch::Up);
+            
+            captured_frame_ = event_root_->frameAtPoint(window_pos);
+            me.button_id = last_button_id_;
+            me.is_down = true;
 
-        switch (type) {
-            case MouseDispatch::Down: event_root_->processMouseDown(me); break;
-            case MouseDispatch::Drag: event_root_->processMouseDrag(me); break;
-            case MouseDispatch::Up:   event_root_->processMouseUp(me); break;
-            case MouseDispatch::Move: event_root_->processMouseMove(me); break;
+            if (captured_frame_) {
+                me.event_frame = captured_frame_;
+                me.position = window_pos - captured_frame_->positionInWindow();
+                captured_frame_->processMouseDown(me);
+            }
+            return;
+        }
+
+        if (type == MouseDispatch::Up) {
+            me.button_id = last_button_id_;
+            me.is_down = false;
+
+            visage::Frame* up_target = captured_frame_ ? captured_frame_ : event_root_->frameAtPoint(window_pos);
+            visage::Frame* new_hover = event_root_->frameAtPoint(window_pos);
+            bool exited = new_hover != captured_frame_;
+
+            if (captured_frame_) {
+                me.event_frame = captured_frame_;
+                me.position = window_pos - captured_frame_->positionInWindow();
+                auto* was_captured = captured_frame_;
+                captured_frame_ = nullptr;
+                was_captured->processMouseUp(me);
+                if (exited)
+                    was_captured->processMouseExit(me);
+            }
+
+            hovered_frame_ = new_hover;
+            if (exited && hovered_frame_) {
+                me.event_frame = hovered_frame_;
+                me.position = window_pos - hovered_frame_->positionInWindow();
+                hovered_frame_->processMouseEnter(me);
+            }
+            return;
+        }
+
+        // Move or Drag
+        if (type == MouseDispatch::Drag && captured_frame_) {
+            me.button_id = last_button_id_;
+            me.is_down = true;
+            me.event_frame = captured_frame_;
+            me.position = window_pos - captured_frame_->positionInWindow();
+            captured_frame_->processMouseDrag(me);
+            return;
+        }
+
+        // Mouse move - update hover
+        visage::Frame* new_hover = event_root_->frameAtPoint(window_pos);
+        if (new_hover != hovered_frame_) {
+            if (hovered_frame_) {
+                me.event_frame = hovered_frame_;
+                me.position = window_pos - hovered_frame_->positionInWindow();
+                hovered_frame_->processMouseExit(me);
+            }
+            if (new_hover) {
+                me.event_frame = new_hover;
+                me.position = window_pos - new_hover->positionInWindow();
+                new_hover->processMouseEnter(me);
+            }
+            hovered_frame_ = new_hover;
+        } else if (hovered_frame_) {
+            me.event_frame = hovered_frame_;
+            me.position = window_pos - hovered_frame_->positionInWindow();
+            hovered_frame_->processMouseMove(me);
+        }
+    }
+
+    void dispatchWheel(const juce::MouseWheelDetails& wheel, const juce::MouseEvent& e) {
+        if (!event_root_)
+            return;
+
+        const visage::Point window_pos = { static_cast<float>(e.position.x), static_cast<float>(e.position.y) };
+
+        visage::MouseEvent me;
+        me.window_position = window_pos;
+        me.wheel_delta_x = wheel.deltaX;
+        me.wheel_delta_y = wheel.deltaY;
+        me.wheel_momentum = wheel.isInertial;
+
+        hovered_frame_ = event_root_->frameAtPoint(window_pos);
+        visage::Frame* temp = hovered_frame_;
+        while (temp) {
+            if (!temp->ignoresMouseEvents()) {
+                me.event_frame = temp;
+                me.position = window_pos - temp->positionInWindow();
+                if (temp->processMouseWheel(me))
+                    break;
+            }
+            temp = temp->parent();
         }
     }
 
@@ -253,15 +349,19 @@ private:
 
         // TEMP: Swap-chain path is unstable in plugin hosting. Use windowless render for preview.
         constexpr bool kForceWindowless = true;
+        const float scale = (float)getApproximateScaleFactorForComponent(this);
+        const int physicalW = juce::roundToInt(getWidth() * scale);
+        const int physicalH = juce::roundToInt(getHeight() * scale);
+
         if (kForceWindowless || !visage::Canvas::swapChainSupported()) {
             windowless_ = true;
-            canvas_->setWindowless(getWidth(), getHeight());
+            canvas_->setWindowless(physicalW, physicalH);
         } else {
             windowless_ = false;
-            canvas_->pairToWindow(nativeWindow, getWidth(), getHeight());
+            canvas_->pairToWindow(nativeWindow, physicalW, physicalH);
         }
 
-        canvas_->setDpiScale((float)getDesktopScaleFactor());
+        canvas_->setDpiScale(scale);
 
         eventHandler_.request_redraw = [this](visage::Frame* frame) {
             if (std::find(staleFrames_.begin(), staleFrames_.end(), frame) == staleFrames_.end())
@@ -320,5 +420,8 @@ private:
     bool windowless_ = false;
     juce::Image backbuffer_;
     visage::Frame* event_root_ = nullptr;
+    visage::Frame* captured_frame_ = nullptr;
+    visage::Frame* hovered_frame_ = nullptr;
+    visage::Point last_mouse_window_pos_ = { 0.0f, 0.0f };
     visage::MouseButton last_button_id_ = visage::kMouseButtonLeft;
 };

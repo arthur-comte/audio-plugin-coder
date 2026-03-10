@@ -32,7 +32,11 @@ Write-Host "--- APC PREVIEW: $PluginName ---" -ForegroundColor Cyan
 
 # 1. Configure (ensure correct framework flags)
 Write-Host "Configuring..." -ForegroundColor Yellow
-cmake -B "$BuildDir" -G "Visual Studio 17 2022" -A x64 --fresh @VisageFlag
+if ($IsMacOs -or $IsLinux) {
+    cmake -B "$BuildDir" -G "Unix Makefiles" @VisageFlag
+} else {
+    cmake -B "$BuildDir" -G "Visual Studio 17 2022" -A x64 --fresh @VisageFlag
+}
 
 if ($UseVisage -and (Test-Path "$BuildDir\CMakeCache.txt")) {
     $cache = Get-Content "$BuildDir\CMakeCache.txt" -Raw
