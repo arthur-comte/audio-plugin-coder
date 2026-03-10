@@ -1,38 +1,46 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+//==============================================================================
 NewMoodAudioProcessorEditor::NewMoodAudioProcessorEditor (NewMoodAudioProcessor& p)
-    : VisagePluginEditor(p), audioProcessor(p)
+    : AudioProcessorEditor (p), audioProcessor (p)
 {
-    setSize(600, 400);
+    setSize (600, 400);
+
+    // Create web view with basic options
+    webView = std::make_unique<juce::WebBrowserComponent> (
+        juce::WebBrowserComponent::Options{}
+            .withBackend (juce::WebBrowserComponent::Options::Backend::webview2)
+            .withNativeIntegrationEnabled());
+
+    addAndMakeVisible (*webView);
+    
+    // Load the embedded web UI
+    webView->goToURL (juce::WebBrowserComponent::getResourceProviderRoot());
 }
 
-NewMoodAudioProcessorEditor::~NewMoodAudioProcessorEditor() = default;
-
-void NewMoodAudioProcessorEditor::onInit()
+NewMoodAudioProcessorEditor::~NewMoodAudioProcessorEditor()
 {
-    mainView = std::make_unique<VisageMainView>();
-    addFrameToCanvas(mainView.get());
-    mainView->setBounds(0, 0, getWidth(), getHeight());
 }
 
-void NewMoodAudioProcessorEditor::onRender()
+//==============================================================================
+void NewMoodAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    // Optional: drive animations or dynamic redraws here.
+    g.fillAll (juce::Colour (0xFF2D2A26));
 }
 
-void NewMoodAudioProcessorEditor::onDestroy()
+void NewMoodAudioProcessorEditor::resized()
 {
-    if (mainView) {
-        removeFrameFromCanvas(mainView.get());
-        mainView.reset();
-    }
+    webView->setBounds (getBounds());
 }
 
-void NewMoodAudioProcessorEditor::onResize(int w, int h)
+//==============================================================================
+std::optional<juce::WebBrowserComponent::Resource> NewMoodAudioProcessorEditor::getResource (const juce::String& url)
 {
-    if (mainView) {
-        mainView->setBounds(0, 0, w, h);
-        mainView->redraw();
-    }
+    return std::nullopt;
+}
+
+std::unique_ptr<juce::ZipFile> NewMoodAudioProcessorEditor::getZipFile()
+{
+    return nullptr;
 }

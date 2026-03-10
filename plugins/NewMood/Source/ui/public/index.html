@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NewMood</title>
+  <script type="module" src="js/index.js"></script>
+  <style>
+    :root {
+      --background: #2D2A26;
+      --panel: #3D3833;
+      --primary: #E8E0D5;
+      --accent: #D4A574;
+      --secondary: #8B7355;
+      --led-active: #7CB342;
+      --led-inactive: #4A4A4A;
+      --knob-body: #4A4540;
+    }
+    
+    body {
+      background: var(--background);
+      color: var(--primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      width: 600px;
+      height: 400px;
+      overflow: hidden;
+      user-select: none;
+    }
+    
+    #plugin-ui {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      height: 100%;
+    }
+    
+    .section {
+      background: var(--panel);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .section-title {
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .knob-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 8px 0;
+      width: 60px;
+    }
+    
+    .knob {
+      width: 50px;
+      height: 50px;
+      background: var(--knob-body);
+      border-radius: 50%;
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .knob::after {
+      content: '';
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      width: 3px;
+      height: 18px;
+      background: var(--accent);
+      transform-origin: center 17px;
+      border-radius: 2px;
+    }
+    
+    .knob-label {
+      font-size: 10px;
+      color: var(--primary);
+      margin-top: 4px;
+      text-transform: uppercase;
+    }
+    
+    .knob-value {
+      font-size: 11px;
+      color: var(--secondary);
+    }
+    
+    .button-row {
+      display: flex;
+      gap: 8px;
+      margin: 8px 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .button {
+      width: 45px;
+      height: 30px;
+      background: var(--knob-body);
+      border: 1px solid var(--secondary);
+      border-radius: 4px;
+      color: var(--primary);
+      font-size: 9px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .button:active {
+      background: var(--accent);
+    }
+    
+    .button.active {
+      background: var(--accent);
+    }
+    
+    .led {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--led-inactive);
+      margin-bottom: 2px;
+    }
+    
+    .button.active .led {
+      background: var(--led-active);
+    }
+    
+    .toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0;
+    }
+    
+    .toggle-switch {
+      width: 40px;
+      height: 20px;
+      background: var(--knob-body);
+      border-radius: 10px;
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      background: var(--secondary);
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+    
+    .toggle-switch.active::after {
+      left: 22px;
+      background: var(--led-active);
+    }
+    
+    .toggle-label {
+      font-size: 11px;
+    }
+    
+    .subdivision-selector {
+      display: flex;
+      gap: 4px;
+      margin-top: 8px;
+    }
+    
+    .sub-btn {
+      padding: 4px 6px;
+      font-size: 9px;
+      background: var(--knob-body);
+      border: 1px solid var(--secondary);
+      border-radius: 3px;
+      color: var(--primary);
+      cursor: pointer;
+    }
+    
+    .sub-btn.active {
+      background: var(--accent);
+      color: var(--background);
+    }
+    
+    header {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--accent);
+      margin-bottom: 10px;
+    }
+    
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--primary);
+      letter-spacing: 3px;
+    }
+  </style>
+</head>
+<body>
+  <div id="plugin-ui">
+    <header>
+      <h1>NEWMOOD</h1>
+    </header>
+    
+    <!-- Core Controls -->
+    <div class="section">
+      <div class="section-title">Core</div>
+      <div class="knob-container">
+        <div class="knob" id="time-knob" data-param="time"></div>
+        <div class="knob-label">Time</div>
+        <div class="knob-value" id="time-value">50</div>
+      </div>
+      <div class="knob-container">
+        <div class="knob" id="speed-knob" data-param="speed"></div>
+        <div class="knob-label">Speed</div>
+        <div class="knob-value" id="speed-value">50</div>
+      </div>
+      <div class="knob-container">
+        <div class="knob" id="mix-knob" data-param="mix"></div>
+        <div class="knob-label">Mix</div>
+        <div class="knob-value" id="mix-value">50</div>
+      </div>
+    </div>
+    
+    <!-- Recording Controls -->
+    <div class="section">
+      <div class="section-title">Record</div>
+      <div class="button-row">
+        <div class="button" id="record-btn" data-param="record">
+          <div class="led"></div>
+          REC
+        </div>
+        <div class="button" id="overdub-btn" data-param="overdub">
+          <div class="led"></div>
+          OVR
+        </div>
+        <div class="button" id="reverse-btn" data-param="reverse">
+          <div class="led"></div>
+          REV
+        </div>
+        <div class="button" id="clear-btn" data-param="clear">
+          <div class="led"></div>
+          CLR
+        </div>
+      </div>
+      
+      <div class="toggle">
+        <div class="toggle-switch" id="sync-toggle" data-param="syncEnabled"></div>
+        <span class="toggle-label">SYNC</span>
+      </div>
+      
+      <div class="subdivision-selector">
+        <button class="sub-btn" data-param="subdivision" data-value="0">1/4</button>
+        <button class="sub-btn" data-param="subdivision" data-value="1">1/8</button>
+        <button class="sub-btn active" data-param="subdivision" data-value="2">1/16</button>
+      </div>
+    </div>
+    
+    <!-- Fine Tune -->
+    <div class="section">
+      <div class="section-title">Fine-Tune</div>
+      <div class="knob-container">
+        <div class="knob" id="feedback-knob" data-param="feedback"></div>
+        <div class="knob-label">Feedback</div>
+        <div class="knob-value" id="feedback-value">30</div>
+      </div>
+      <div class="knob-container">
+        <div class="knob" id="grainSize-knob" data-param="grainSize"></div>
+        <div class="knob-label">Grain</div>
+        <div class="knob-value" id="grainSize-value">30</div>
+      </div>
+      <div class="knob-container">
+        <div class="knob" id="drift-knob" data-param="drift"></div>
+        <div class="knob-label">Drift</div>
+        <div class="knob-value" id="drift-value">0</div>
+      </div>
+      <div class="knob-container">
+        <div class="knob" id="spread-knob" data-param="spread"></div>
+        <div class="knob-label">Spread</div>
+        <div class="knob-value" id="spread-value">50</div>
+      </div>
+      <div class="knob-container">
+        <div class="knob" id="tone-knob" data-param="tone"></div>
+        <div class="knob-label">Tone</div>
+        <div class="knob-value" id="tone-value">50</div>
+      </div>
+      <div class="knob-container">
+        <div class="knob" id="level-knob" data-param="level"></div>
+        <div class="knob-label">Level</div>
+        <div class="knob-value" id="level-value">75</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
