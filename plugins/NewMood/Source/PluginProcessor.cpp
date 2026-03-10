@@ -264,6 +264,10 @@ void NewMoodAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     const float level = parameters.getRawParameterValue ("level")->load();
     const float feedback = parameters.getRawParameterValue ("feedback")->load();
     const float tone = parameters.getRawParameterValue ("tone")->load();
+    const float speedParam = parameters.getRawParameterValue ("speed")->load();
+    const float grainSizeParam = parameters.getRawParameterValue ("grainSize")->load();
+    const float driftParam = parameters.getRawParameterValue ("drift")->load();
+    const float spreadParam = parameters.getRawParameterValue ("spread")->load();
     
     // Recording controls
     const bool record = parameters.getRawParameterValue ("record")->load() > 0.5f;
@@ -277,14 +281,62 @@ void NewMoodAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     // Set output level
     outputGain.setGainLinear (level);
     
-    // Simple pass-through for now (granular processing to be implemented)
-    // This is a placeholder that passes audio through
+    // Granular processing
+    const int grainSize = static_cast<int>(20 + grainSizeParam * 200); // 20-220ms grains
+    const float speed = 0.5f + (speedParam - 0.5f) * 2.0f; // 0-1 range to 0-1 speed
+    const float spread = spreadParam * 0.5f;
+    const float drift = driftParam * 0.1f;
+    
+    // Get channel pointers
+    auto* leftChannel = buffer.getWritePointer (0);
+    auto* rightChannel = buffer.getNumChannels() > 1 ? buffer.getWritePointer (1) : leftChannel;
+    
+    for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+    {
+        // Recording: write input to loop buffer
+        if (record)
+        {
+            loopBuffer[writePosition] = (leftChannel[sample] + (rightChannel[sample])) * 0.5f;
+            writePosition = (writePosition + 1) % bufferSize;
+            if (loopLength > 0 && writePosition >= loopLength)
+                writePosition = 0;
+        }
+        
+        // Playback: read from loop buffer with granular playback
+        if (loopLength > 10 && !record)
+        {
+            // Calculate grain position
+            float grainPos = (readPosition + sample * speed) / static_cast<float>(grainSize);
+            int grainIndex = static_cast<int>(grainPos) % loopLength;
+            
+            // Add drift
+            grainIndex += static_cast<int>(drift * sin(grainPos * 0.1f) * loopLength);
+            grainIndex = (grainIndex + loopLength) % loopLength;
+            
+            // Read from buffer with spread (slight offset for stereo)
+            float leftSample = loopBuffer[grainIndex];
+            float rightSample = loopBuffer[(grainIndex + static_cast<int>(spread * loopLength)) % loopLength];
+            
+            // Apply feedback
+            float feedbackSample = (leftSample + rightSample) * 0.5f * feedback;
+            
+            // Mix dry/wet
+            float wetSample = feedbackSample;
+            float drySample = leftChannel[sample];
+            
+            leftChannel[sample] = drySample * (1.0f - mix) + wetSample * mix;
+            if (buffer.getNumChannels() > 1)
+                rightChannel[sample] = drySample * (1.0f - mix) + rightSample * mix;
+        }
+    }
+    
+    // Update read position for next buffer
+    if (loopLength > 10)
+        readPosition = (readPosition + static_cast<int>(buffer.getNumSamples() * speed)) % loopLength;
+    
+    // Apply output gain
     juce::dsp::AudioBlock<float> block (buffer);
     juce::dsp::ProcessContextReplacing<float> context (block);
-    
-    // Apply gain and pass through
-    inputGain.setGainLinear (mix);
-    inputGain.process (context);
     outputGain.process (context);
 }
 
