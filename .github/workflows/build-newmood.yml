@@ -1,0 +1,28 @@
+name: Build NewMood
+
+on:
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: 'Platforms to build (macos,all)'
+        default: 'macos'
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Configure
+        run: cmake -S . -B build -G Xcode -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+      - name: Build VST3
+        run: cmake --build build --config Release --target newmood_VST3
+      - name: Build AU
+        run: cmake --build build --config Release --target newmood_AU
+      - name: Build Standalone
+        run: cmake --build build --config Release --target newmood_Standalone
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-newmood
+          path: build/plugins/NewMood/newmood_artefacts/Release/*
