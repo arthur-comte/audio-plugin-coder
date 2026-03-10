@@ -10,14 +10,6 @@ juce_add_plugin(newmood
     NEEDS_WEB_BROWSER TRUE
 )
 
-# Binary assets (web UI files)
-juce_add_binary_data(newmood_WebUI
-    SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/Source/ui/public/index.html
-        ${CMAKE_CURRENT_SOURCE_DIR}/Source/ui/public/js/index.js
-    NAMESPACE newmood_WebUI
-)
-
 # Source files
 target_sources(newmood
     PRIVATE
@@ -34,7 +26,6 @@ target_include_directories(newmood
 # Required JUCE modules + WebView
 target_link_libraries(newmood
     PRIVATE
-        newmood_WebUI
         juce::juce_audio_basics
         juce::juce_audio_devices
         juce::juce_audio_formats
