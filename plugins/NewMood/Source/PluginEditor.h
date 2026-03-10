@@ -5,7 +5,7 @@
 #include "PluginProcessor.h"
 
 /**
- * NewMood Plugin Editor - Simple JUCE UI
+ * NewMood Plugin Editor - Simple JUCE UI with controls
  */
 class NewMoodAudioProcessorEditor : public juce::AudioProcessorEditor
 {
@@ -18,11 +18,13 @@ public:
     void resized() override;
 
 private:
+    void createSlider (const juce::String& label, const juce::String& paramId, int x, int y);
+    
     //==============================================================================
-    // Simple labels
+    // UI Elements
     juce::Label titleLabel;
-    juce::Label subtitleLabel;
-    juce::Label infoLabel;
+    juce::OwnedArray<juce::Slider> sliders;
+    juce::TextButton recordButton;
 
     // Reference to processor
     NewMoodAudioProcessor& audioProcessor;
