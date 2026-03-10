@@ -1,13 +1,12 @@
 cmake_minimum_required(VERSION 3.15)
 
-# Plugin definition with WebView support
+# Plugin definition
 juce_add_plugin(newmood
     COMPANY_NAME "APC"
     PLUGIN_MANUFACTURER_CODE "APCM"
     PLUGIN_CODE "NMWD"
     FORMATS VST3 AU Standalone
     PRODUCT_NAME "NewMood"
-    NEEDS_WEB_BROWSER TRUE
 )
 
 # Source files
@@ -49,5 +48,4 @@ target_compile_definitions(newmood
     PUBLIC
         JUCE_VST3_CAN_REPLACE_VST2=0
         _USE_MATH_DEFINES=1
-        JUCE_WEB_BROWSER=1
 )

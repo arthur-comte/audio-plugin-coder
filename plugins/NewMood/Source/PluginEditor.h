@@ -1,11 +1,11 @@
 #pragma once
 
 #include <juce_audio_processors/juce_audio_processors.h>
-#include <juce_gui_extra/juce_gui_extra.h>
+#include <juce_gui_basics/juce_gui_basics.h>
 #include "PluginProcessor.h"
 
 /**
- * NewMood Plugin Editor - WebView UI Integration
+ * NewMood Plugin Editor - Simple JUCE UI
  */
 class NewMoodAudioProcessorEditor : public juce::AudioProcessorEditor
 {
@@ -19,13 +19,10 @@ public:
 
 private:
     //==============================================================================
-    // Web browser component
-    std::unique_ptr<juce::WebBrowserComponent> webView;
-
-    //==============================================================================
-    // Resource provider for embedded web files
-    std::optional<juce::WebBrowserComponent::Resource> getResource (const juce::String& url);
-    std::unique_ptr<juce::ZipFile> getZipFile();
+    // Simple labels
+    juce::Label titleLabel;
+    juce::Label subtitleLabel;
+    juce::Label infoLabel;
 
     // Reference to processor
     NewMoodAudioProcessor& audioProcessor;

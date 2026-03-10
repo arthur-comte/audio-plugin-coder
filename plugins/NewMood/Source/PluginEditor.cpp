@@ -7,49 +7,26 @@ NewMoodAudioProcessorEditor::NewMoodAudioProcessorEditor (NewMoodAudioProcessor&
 {
     setSize (800, 600);
 
-    // Create web view - use default backend (WKWebView on macOS)
-    webView = std::make_unique<juce::WebBrowserComponent> (
-        juce::WebBrowserComponent::Options{}
-            .withNativeIntegrationEnabled());
+    // Title label
+    titleLabel.setText ("NewMood", juce::dontSendNotification);
+    titleLabel.setFont (juce::Font (32.0f, juce::Font::bold));
+    titleLabel.setColour (juce::Label::textColourId, juce::Colour (0xFFFF6B35));
+    titleLabel.setBounds (300, 50, 200, 40);
+    addAndMakeVisible (titleLabel);
 
-    addAndMakeVisible (*webView);
+    // Subtitle
+    subtitleLabel.setText ("Chase Bliss inspired granular looper", juce::dontSendNotification);
+    subtitleLabel.setFont (juce::Font (16.0f));
+    subtitleLabel.setColour (juce::Label::textColourId, juce::Colour (0xFFE8E4DF));
+    subtitleLabel.setBounds (220, 100, 360, 24);
+    addAndMakeVisible (subtitleLabel);
     
-    // Load the web UI from the app bundle resources
-    // For standalone: use bundle path. For plugin: use a placeholder HTML
-    webView->goToURL ("about:blank");
-    
-    // Inject the HTML directly
-    auto html = R"(
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NewMood</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: linear-gradient(180deg, #1a1816 0%, #2d2a26 100%);
-            color: #e8e4df;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        h1 { font-size: 2.5rem; margin-bottom: 1rem; color: #ff6b35; }
-        p { font-size: 1.1rem; opacity: 0.8; }
-    </style>
-</head>
-<body>
-    <h1>NewMood</h1>
-    <p>Chase Bliss inspired granular looper</p>
-</body>
-</html>
-)";
-    
-    webView->loadHTMLString (html, "");
+    // Placeholder text
+    infoLabel.setText ("VST3/AU Plugin - Build Complete!", juce::dontSendNotification);
+    infoLabel.setFont (juce::Font (14.0f));
+    infoLabel.setColour (juce::Label::textColourId, juce::Colour (0xFFAAAAAA));
+    infoLabel.setBounds (280, 200, 240, 20);
+    addAndMakeVisible (infoLabel);
 }
 
 NewMoodAudioProcessorEditor::~NewMoodAudioProcessorEditor()
@@ -64,5 +41,4 @@ void NewMoodAudioProcessorEditor::paint (juce::Graphics& g)
 
 void NewMoodAudioProcessorEditor::resized()
 {
-    webView->setBounds (getBounds());
 }
